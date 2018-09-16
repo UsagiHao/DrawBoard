@@ -111,6 +111,18 @@ public class DrawBoard extends JFrame {
         );
         functionMenu.add(identifyAllItem);
 
+        //帮助
+        JMenuItem helpItem= new JMenuItem("说明");
+        helpItem.addActionListener(
+                new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        //identifyAll();
+                    }
+                }
+        );
+        helpMenu.add(helpItem);
+
         toolBar.add(fileMenu);
         toolBar.add(functionMenu);
         toolBar.add(helpMenu);
