@@ -4,10 +4,11 @@ import java.awt.event.*;
 import java.io.Serializable;
 
 public class DrawBoard extends JFrame {
-    private JButton funtions;
-    private String functionNames[] = {"new", "save", "load", "draw"};
-    JToolBar buttonPanel;
+//    private JButton funtions;
+  //  private String functionNames[] = {"new", "save", "load", "draw"};
+ //   JToolBar buttonPanel;
     private JLabel statusBar;  //显示鼠标状态的提示条
+    private JLabel identifyLabel = new JLabel("形状");
     private DrawPanel drawPanel;
     private int width = 800;
     private int height = 550;
@@ -17,7 +18,7 @@ public class DrawBoard extends JFrame {
     int R = color.getRed();
     int G = color.getGreen();
     int B = color.getBlue();
-
+    int count = 0;
     public DrawBoard(){
         super("画板");
         JMenuBar toolBar = new JMenuBar();
@@ -93,7 +94,13 @@ public class DrawBoard extends JFrame {
                 new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        //identify();
+                        if (count == 1){
+                            identifyLabel.setText("圆形");
+                        }else if (count == 2){
+                            identifyLabel.setText("三角形");
+                        }else {
+                            identifyLabel.setText("笔画过多");
+                        }
                     }
                 }
         );
@@ -135,10 +142,11 @@ public class DrawBoard extends JFrame {
         container.add(toolBar, BorderLayout.NORTH);
         container.add(drawPanel, BorderLayout.CENTER);
         container.add(statusBar, BorderLayout.SOUTH);
+        container.add(identifyLabel, BorderLayout.EAST);
 
         createNewItem();
         setSize(width, height);
-        show();
+        setVisible(true);
     }
 
     class DrawPanel extends JPanel{
@@ -146,7 +154,7 @@ public class DrawBoard extends JFrame {
             setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
             setBackground(Color.white);
             addMouseListener(new mouseA());//鼠标点击时
-            addMouseMotionListener(new mouseB());
+            addMouseMotionListener(new mouseB());//鼠标移动时
         }
 
         @Override
@@ -182,6 +190,7 @@ public class DrawBoard extends JFrame {
             itemList[index].y1 = itemList[index].y2 = e.getY();
             repaint();
             index++;
+            count++;
             createNewItem();
         }
         public void mouseEntered(MouseEvent e) {
