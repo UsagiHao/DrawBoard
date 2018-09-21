@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.Serializable;
-
+import Graphics.*;
 public class DrawBoard extends JFrame {
 //    private JButton funtions;
   //  private String functionNames[] = {"new", "save", "load", "draw"};
@@ -94,12 +94,19 @@ public class DrawBoard extends JFrame {
                 new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
+                        Graphic graphic;
                         if (count == 1){
-                            identifyLabel.setText("圆形");
+                            graphic = new Circle(count);
+                            identifyLabel.setText(graphic.getShape());
                         }else if (count == 2){
-                            identifyLabel.setText("三角形");
-                        }else {
-                            identifyLabel.setText("笔画过多");
+                            graphic = new Triangle(count);
+                            identifyLabel.setText(graphic.getShape());
+                        }else if (count == 3){
+                            graphic = new Square(count);
+                            identifyLabel.setText(graphic.getShape());
+                        }else if (count == 4){
+                            graphic = new Rectangler(count);
+                            identifyLabel.setText(graphic.getShape());
                         }
                     }
                 }
