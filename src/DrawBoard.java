@@ -6,7 +6,7 @@ import java.io.*;
 import Graphics.*;
 public class DrawBoard extends JFrame {
     private ObjectInputStream input;
-    private ObjectOutputStream output; //定义输入输出流，用来调用和保存图像文件
+    private ObjectOutputStream output;
     private JLabel statusBar;  //显示鼠标状态的提示条
     private JLabel identifyLabel = new JLabel("形状");
     private DrawPanel drawPanel;
@@ -33,7 +33,11 @@ public class DrawBoard extends JFrame {
                 new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        //   newFile();
+                        color = Color.black;
+                        R = color.getRed();
+                        G = color.getGreen();
+                        B = color.getBlue();
+                        clear();
                     }
                 }
         );
@@ -82,26 +86,41 @@ public class DrawBoard extends JFrame {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         Graphic graphic;
-                        if (count == 1){
-                            graphic = new Circles(count);
-                            count = 0;
-                            identifyLabel.setText(graphic.getShape());
-                        }else if (count == 2){
-                            graphic = new Triangles(count);
-                            count = 0;
-                            identifyLabel.setText(graphic.getShape());
-                        }else if (count == 3){
-                            graphic = new Squares(count);
-                            count = 0;
-                            identifyLabel.setText(graphic.getShape());
-                        }else if (count == 4){
-                            graphic = new Rectangles(count);
-                            count = 0;
-                            identifyLabel.setText(graphic.getShape());
-                        }else {
-                            count = 0;
-                            identifyLabel.setText("笔画过多");
+                        switch (count){
+                            case 1:{
+                                graphic = new Circles(count);
+                                count = 0;
+                                identifyLabel.setText(graphic.getShape());
+                                break;
+                            }
+                            case 2:{
+                                graphic = new Triangles(count);
+                                count = 0;
+                                identifyLabel.setText(graphic.getShape());
+                                break;
+                            }
+                            case 3:{
+                                graphic = new Squares(count);
+                                count = 0;
+                                identifyLabel.setText(graphic.getShape());
+                                break;
+                            }
+                            case 4:{
+                                graphic = new Rectangles(count);
+                                count = 0;
+                                identifyLabel.setText(graphic.getShape());
+                                break;
+                            }
+                            case 0:{
+                                identifyLabel.setText("未检测到");
+                                break;
+                            }
+                            default:{
+                                count = 0;
+                                identifyLabel.setText("笔画过多");
+                            }
                         }
+
                     }
                 }
         );
@@ -113,7 +132,7 @@ public class DrawBoard extends JFrame {
                 new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        //clear();
+                        clear();
                     }
                 }
         );
@@ -158,6 +177,12 @@ public class DrawBoard extends JFrame {
         createNewItem();
         setSize(width, height);
         setVisible(true);
+    }
+
+    public void clear(){
+        index = 0;
+        createNewItem();
+        repaint();//将有关值设置为初始状态，并且重画
     }
 
     public void saveFile() {
