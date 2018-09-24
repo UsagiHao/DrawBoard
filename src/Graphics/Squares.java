@@ -1,9 +1,9 @@
 package Graphics;
 
-public class Square extends Graphic {
+public class Squares extends Graphic {
     private String shape = "正方形";
 
-    public Square(int num){
+    public Squares(int num){
 
     }
 

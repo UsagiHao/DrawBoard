@@ -1,31 +1,31 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.Serializable;
+import java.io.*;
+
 import Graphics.*;
 public class DrawBoard extends JFrame {
-//    private JButton funtions;
-  //  private String functionNames[] = {"new", "save", "load", "draw"};
- //   JToolBar buttonPanel;
+    private ObjectInputStream input;
+    private ObjectOutputStream output; //定义输入输出流，用来调用和保存图像文件
     private JLabel statusBar;  //显示鼠标状态的提示条
     private JLabel identifyLabel = new JLabel("形状");
     private DrawPanel drawPanel;
     private int width = 800;
     private int height = 550;
-    drawings[] itemList = new drawings[5000]; //用来存放基本图形的数组
+    Graphic[] itemList = new Graphic[5000]; //用来存放基本图形的数组
     int index = 0;
     private Color color = Color.black;
     int R = color.getRed();
     int G = color.getGreen();
     int B = color.getBlue();
     int count = 0;
+
     public DrawBoard(){
         super("画板");
         JMenuBar toolBar = new JMenuBar();
         JMenu fileMenu = new JMenu("文件");
         JMenu functionMenu = new JMenu("功能");
         JMenu helpMenu = new JMenu("帮助");
-        //fileMenu.setMnemonic('F');//设置快捷键
 
         //新建
         JMenuItem newItem= new JMenuItem("新建");
@@ -45,7 +45,7 @@ public class DrawBoard extends JFrame {
                 new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        //    saveFile();
+                        saveFile();
                     }
                 }
         );
@@ -57,7 +57,7 @@ public class DrawBoard extends JFrame {
                 new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        // loadFile();
+                        loadFile();
                     }
                 }
         );
@@ -75,19 +75,6 @@ public class DrawBoard extends JFrame {
         );
         fileMenu.add(exitItem);
 
-
-        //绘制
-        JMenuItem drawItem= new JMenuItem("绘图");
-        drawItem.addActionListener(
-                new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        //draw();
-                    }
-                }
-        );
-        functionMenu.add(drawItem);
-
         //识别
         JMenuItem identifyItem= new JMenuItem("识别");
         identifyItem.addActionListener(
@@ -96,34 +83,51 @@ public class DrawBoard extends JFrame {
                     public void actionPerformed(ActionEvent e) {
                         Graphic graphic;
                         if (count == 1){
-                            graphic = new Circle(count);
+                            graphic = new Circles(count);
+                            count = 0;
                             identifyLabel.setText(graphic.getShape());
                         }else if (count == 2){
-                            graphic = new Triangle(count);
+                            graphic = new Triangles(count);
+                            count = 0;
                             identifyLabel.setText(graphic.getShape());
                         }else if (count == 3){
-                            graphic = new Square(count);
+                            graphic = new Squares(count);
+                            count = 0;
                             identifyLabel.setText(graphic.getShape());
                         }else if (count == 4){
-                            graphic = new Rectangler(count);
+                            graphic = new Rectangles(count);
+                            count = 0;
                             identifyLabel.setText(graphic.getShape());
+                        }else {
+                            count = 0;
+                            identifyLabel.setText("笔画过多");
                         }
                     }
                 }
         );
         functionMenu.add(identifyItem);
 
-        //识别全部
-        JMenuItem identifyAllItem= new JMenuItem("识别全部");
-        identifyAllItem.addActionListener(
+        //清屏
+        JMenuItem clearItem= new JMenuItem("清屏");
+        clearItem.addActionListener(
                 new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        //identifyAll();
+                        //clear();
                     }
                 }
         );
-        functionMenu.add(identifyAllItem);
+        functionMenu.add(clearItem);
+
+        //选择颜色
+        JMenuItem colorItem = new JMenuItem("颜色");
+        colorItem.addActionListener(
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        chooseColor();  //如果被触发，则调用选择颜色函数段
+                    }
+                });
+        functionMenu.add(colorItem);
 
         //帮助
         JMenuItem helpItem= new JMenuItem("说明");
@@ -131,7 +135,7 @@ public class DrawBoard extends JFrame {
                 new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        //identifyAll();
+                        //help();
                     }
                 }
         );
@@ -156,6 +160,86 @@ public class DrawBoard extends JFrame {
         setVisible(true);
     }
 
+    public void saveFile() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        int result = fileChooser.showSaveDialog(this);
+        if (result == JFileChooser.CANCEL_OPTION) {
+            return;
+        }
+        File fileName = fileChooser.getSelectedFile();
+        fileName.canWrite();
+        if (fileName == null || fileName.getName().equals("")) {
+            JOptionPane.showMessageDialog(fileChooser, "Invalid File Name",
+                    "Invalid File Name", JOptionPane.ERROR_MESSAGE);
+        } else {
+            try {
+                fileName.delete();
+                FileOutputStream fos = new FileOutputStream(fileName);
+                output = new ObjectOutputStream(fos);
+                Graphic record;
+                output.writeInt(index);
+                for (int i = 0; i < index; i++) {
+                    Graphic p = itemList[i];
+                    output.writeObject(p);
+                    output.flush();    //将所有图形信息强制转换成父类线性化存储到文件中
+                }
+                output.close();
+                fos.close();
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
+        }
+    }
+    //打开一个图形文件程序段
+    public void loadFile() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        int result = fileChooser.showOpenDialog(this);
+        if (result == JFileChooser.CANCEL_OPTION) {
+            return;
+        }
+        File fileName = fileChooser.getSelectedFile();
+        fileName.canRead();
+        if (fileName == null || fileName.getName().equals("")) {
+            JOptionPane.showMessageDialog(fileChooser, "Invalid File Name",
+                    "Invalid File Name", JOptionPane.ERROR_MESSAGE);
+        } else {
+            try {
+                FileInputStream fis = new FileInputStream(fileName);
+                input = new ObjectInputStream(fis);
+                Graphic inputRecord;
+                int countNumber = 0;
+                countNumber = input.readInt();
+                for (index = 0; index < countNumber; index++) {
+                    inputRecord = (Graphic) input.readObject();
+                    itemList[index] = inputRecord;
+                }
+                createNewItem();
+                input.close();
+                repaint();
+            } catch (EOFException endofFileException) {
+                JOptionPane.showMessageDialog(this, "no more record in file",
+                        "class not found", JOptionPane.ERROR_MESSAGE);
+            } catch (ClassNotFoundException classNotFoundException) {
+                JOptionPane.showMessageDialog(this, "Unable to Create Object",
+                        "end of file", JOptionPane.ERROR_MESSAGE);
+            } catch (IOException ioException) {
+                JOptionPane.showMessageDialog(this, "error during read from file",
+                        "read Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    public void chooseColor() {
+        color = JColorChooser.showDialog(DrawBoard.this,
+                "Choose a color", color);
+        R = color.getRed();
+        G = color.getGreen();
+        B = color.getBlue();
+        itemList[index].setColor(R, G, B);
+    }
+
     class DrawPanel extends JPanel{
         public DrawPanel(){
             setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
@@ -174,7 +258,7 @@ public class DrawBoard extends JFrame {
                 j++;
             }
         }
-        void draw(Graphics2D g2d, drawings i) {
+        void draw(Graphics2D g2d, Graphic i) {
             i.draw(g2d);//将画笔传入到各个子类中，用来完成各自的绘图
         }
     }
@@ -228,10 +312,8 @@ public class DrawBoard extends JFrame {
 
     void createNewItem(){
         drawPanel.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
-        itemList[index] = new drawings();
-        itemList[index].R = R;
-        itemList[index].G = G;
-        itemList[index].B = B;
+        itemList[index] = new Graphic();
+        itemList[index].setColor(R, G, B);
     }
 
     public static void main(String args[]) {
@@ -244,13 +326,4 @@ public class DrawBoard extends JFrame {
     }
 }
 
-class drawings implements Serializable//父类，基本图形单元，用到串行化接口，保存时所用
-{
-    int x1, y1, x2, y2; //定义坐标属性
-    int R, G, B;        //定义色彩属性
 
-    void draw(Graphics2D g2d) {
-        g2d.drawLine(x1, y1, x2, y2);
-    }
-    ;//定义绘图函数
-}

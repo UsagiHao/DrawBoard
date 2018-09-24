@@ -1,9 +1,9 @@
 package Graphics;
 
-public class Circle extends Graphic {
+public class Circles extends Graphic {
     private String shape = "圆形";
 
-    public Circle(int num){
+    public Circles(int num){
 
     }
 

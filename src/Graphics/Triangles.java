@@ -1,9 +1,9 @@
 package Graphics;
 
-public class Triangle extends Graphic {
+public class Triangles extends Graphic {
     private String shape = "三角形";
 
-    public Triangle(int num){
+    public Triangles(int num){
 
     }
 
