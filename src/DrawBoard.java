@@ -7,8 +7,7 @@ import Graphics.*;
 public class DrawBoard extends JFrame {
     private ObjectInputStream input;
     private ObjectOutputStream output;
-    private JLabel statusBar;  //显示鼠标状态的提示条
-    private JLabel identifyLabel = new JLabel("形状");
+    private JLabel graphicLabel; //显示图形形状
     private DrawPanel drawPanel;
     private int width = 800;
     private int height = 550;
@@ -90,37 +89,36 @@ public class DrawBoard extends JFrame {
                             case 1:{
                                 graphic = new Circles(count);
                                 count = 0;
-                                identifyLabel.setText(graphic.getShape());
+                                graphicLabel.setText(graphic.getShape());
                                 break;
                             }
                             case 2:{
                                 graphic = new Triangles(count);
                                 count = 0;
-                                identifyLabel.setText(graphic.getShape());
+                                graphicLabel.setText(graphic.getShape());
                                 break;
                             }
                             case 3:{
                                 graphic = new Squares(count);
                                 count = 0;
-                                identifyLabel.setText(graphic.getShape());
+                                graphicLabel.setText(graphic.getShape());
                                 break;
                             }
                             case 4:{
                                 graphic = new Rectangles(count);
                                 count = 0;
-                                identifyLabel.setText(graphic.getShape());
+                                graphicLabel.setText(graphic.getShape());
                                 break;
                             }
                             case 0:{
-                                identifyLabel.setText("未检测到");
+                                graphicLabel.setText("未检测到");
                                 break;
                             }
                             default:{
                                 count = 0;
-                                identifyLabel.setText("笔画过多");
+                                graphicLabel.setText("笔画过多");
                             }
                         }
-
                     }
                 }
         );
@@ -143,7 +141,7 @@ public class DrawBoard extends JFrame {
         colorItem.addActionListener(
                 new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
-                        chooseColor();  //如果被触发，则调用选择颜色函数段
+                        chooseColor();
                     }
                 });
         functionMenu.add(colorItem);
@@ -155,6 +153,10 @@ public class DrawBoard extends JFrame {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         //help();
+                        JOptionPane.showMessageDialog(null,
+                                "一块画板可以进行多次画图，但请逐一识别",
+                                " 画图板程序说明 ",
+                                JOptionPane.INFORMATION_MESSAGE);
                     }
                 }
         );
@@ -166,22 +168,23 @@ public class DrawBoard extends JFrame {
 
         drawPanel = new DrawPanel();
 
-        statusBar = new JLabel("mouse status will be showed here");
+        graphicLabel = new JLabel("图形的形状将会显示在此处：");
 
         Container container = getContentPane();
         container.add(toolBar, BorderLayout.NORTH);
         container.add(drawPanel, BorderLayout.CENTER);
-        container.add(statusBar, BorderLayout.SOUTH);
-        container.add(identifyLabel, BorderLayout.EAST);
+        container.add(graphicLabel, BorderLayout.SOUTH);
 
         createNewItem();
         setSize(width, height);
+        setLocationRelativeTo(null);
         setVisible(true);
     }
 
     public void clear(){
         index = 0;
         createNewItem();
+        graphicLabel.setText("图形的形状将会显示在此处：");
         repaint();//将有关值设置为初始状态，并且重画
     }
 
@@ -204,6 +207,7 @@ public class DrawBoard extends JFrame {
                 output = new ObjectOutputStream(fos);
                 Graphic record;
                 output.writeInt(index);
+                output.writeUTF(graphicLabel.getText());
                 for (int i = 0; i < index; i++) {
                     Graphic p = itemList[i];
                     output.writeObject(p);
@@ -216,7 +220,7 @@ public class DrawBoard extends JFrame {
             }
         }
     }
-    //打开一个图形文件程序段
+
     public void loadFile() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -236,6 +240,7 @@ public class DrawBoard extends JFrame {
                 Graphic inputRecord;
                 int countNumber = 0;
                 countNumber = input.readInt();
+                graphicLabel.setText(input.readUTF());
                 for (index = 0; index < countNumber; index++) {
                     inputRecord = (Graphic) input.readObject();
                     itemList[index] = inputRecord;
@@ -290,9 +295,6 @@ public class DrawBoard extends JFrame {
 
     class mouseA extends MouseAdapter{
         public void mousePressed(MouseEvent e){
-            statusBar.setText("鼠标停留在当前位置:[" + e.getX() +
-                    ", " + e.getY() + "]");//设置状态提示
-
             itemList[index].x1 = itemList[index].x2 = e.getX();
             itemList[index].y1 = itemList[index].y2 = e.getY();
             index++;
@@ -300,8 +302,6 @@ public class DrawBoard extends JFrame {
         }
 
         public void mouseReleased(MouseEvent e) {
-            statusBar.setText("     Mouse Released @:[" + e.getX() +
-                    ", " + e.getY() + "]");
             itemList[index].x1 = itemList[index].x2 = e.getX();
             itemList[index].y1 = itemList[index].y2 = e.getY();
             repaint();
@@ -309,29 +309,15 @@ public class DrawBoard extends JFrame {
             count++;
             createNewItem();
         }
-        public void mouseEntered(MouseEvent e) {
-            statusBar.setText("     Mouse Entered @:[" + e.getX() +
-                    ", " + e.getY() + "]");
-        }
-        public void mouseExited(MouseEvent e) {
-            statusBar.setText("     Mouse Exited @:[" + e.getX() +
-                    ", " + e.getY() + "]");
-        }
     }
 
     class mouseB extends MouseMotionAdapter {
         public void mouseDragged(MouseEvent e) {
-            statusBar.setText("     Mouse Dragged @:[" + e.getX() +
-                    ", " + e.getY() + "]");
             itemList[index - 1].x1 = itemList[index].x2 = itemList[index].x1 = e.getX();
             itemList[index - 1].y1 = itemList[index].y2 = itemList[index].y1 = e.getY();
             index++;
             createNewItem();
             repaint();
-        }
-        public void mouseMoved(MouseEvent e) {
-            statusBar.setText("     Mouse Moved @:[" + e.getX() +
-                    ", " + e.getY() + "]");
         }
     }
 
@@ -345,8 +331,7 @@ public class DrawBoard extends JFrame {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
-        }//将界面设置为当前windows风格
-
+        }
         DrawBoard drawBoard = new DrawBoard();
     }
 }
