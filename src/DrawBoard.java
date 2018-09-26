@@ -15,6 +15,8 @@ public class DrawBoard extends JFrame {
     private int B = color.getBlue();
     private int count = 0;
     private String graphics = "";
+    private static final int width = 800;
+    private static final int height = 600;
 
     public DrawBoard(){
         super("画板");
@@ -271,7 +273,7 @@ public class DrawBoard extends JFrame {
             e.printStackTrace();
         }
         DrawBoard drawBoard = new DrawBoard();
-        drawBoard.setSize(1024, 768);
+        drawBoard.setSize(width, height);
         drawBoard.setLocationRelativeTo(null);
         drawBoard.setVisible(true);
     }

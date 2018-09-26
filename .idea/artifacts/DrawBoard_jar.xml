@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="DrawBoard:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/DrawBoard_jar</output-path>
+    <root id="archive" name="DrawBoard.jar">
+      <element id="module-output" name="DrawBoard" />
+    </root>
+  </artifact>
+</component>

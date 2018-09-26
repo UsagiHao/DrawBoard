@@ -1,2 +1,8 @@
-# DrawBoard
-Homework for Software Construction written in Java
+## 简易画板
+### 支持功能有
+* 文件的新建、存取
+* 图像的识别
+* 画笔颜色的调整
+* 清屏
+### 注意事项
+* 同一个画布上可以画多个图形，但需要按照“画一个，识别一个；画一个，识别一个”的流程逐一识别
